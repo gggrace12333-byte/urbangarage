@@ -6,7 +6,7 @@ function getSql() {
   if (!sql) {
     const url = process.env.POSTGRES_URL || process.env.DATABASE_URL || '';
     if (!url) throw new Error('POSTGRES_URL not set');
-    sql = postgres(url, { max: 10, ssl: 'require' });
+    sql = postgres(url, { max: 10 });
   }
   return sql;
 }
