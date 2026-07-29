@@ -5,9 +5,9 @@ import { usePathname } from 'next/navigation';
 
 async function getCountry(): Promise<string> {
   try {
-    const res = await fetch('https://ipapi.co/json/');
+    const res = await fetch('/api/analytics/country');
     const data = await res.json();
-    return data.country_name || 'Unknown';
+    return data.country || 'Unknown';
   } catch {
     return 'Unknown';
   }
