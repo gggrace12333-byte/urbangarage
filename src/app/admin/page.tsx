@@ -14,7 +14,7 @@ export default function Dashboard() {
   const [data, setData] = useState<Analytics | null>(null);
   const [days, setDays] = useState(30);
 
-  useEffect(() => { fetch(`/api/analytics?days=${days}`).then(r => r.json()).then(setData); }, [days]);
+  useEffect(() => { fetch(`/api/analytics?days=${days}`).then(r => r.json()).then(d => setData({ totalVisits:0, cartAdds:0, orders:0, refunds:0, revenue:0, countries:[], trend:[], ...(d || {}) })).catch(() => setData({ totalVisits:0, cartAdds:0, orders:0, refunds:0, revenue:0, countries:[], trend:[] })); }, [days]);
 
   if (!data) return <div style={{ padding: 40, textAlign: 'center', color: '#646970' }}>Loading analytics...</div>;
 
