@@ -1,61 +1,59 @@
-// Production (Vercel) PostgreSQL via @neondatabase/serverless
-// Uses WebSocket-based connection that works in serverless
-import { Pool } from '@neondatabase/serverless';
+import { createClient } from '@supabase/supabase-js';
 
-let pool: any = null;
+let client: any = null;
 
-function getPool() {
-  if (!pool) {
-    const url = process.env.POSTGRES_URL || process.env.DATABASE_URL || '';
-    pool = new Pool({ connectionString: url });
+function getClient() {
+  if (!client) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://ikjbbfgrwynixtpfdauj.supabase.co';
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
+    if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY not set');
+    client = createClient(url, key);
   }
-  return pool;
+  return client;
 }
 
-function toPg(sql: string, params: any[]): [string, any[]] {
-  let i = 0;
-  return [sql.replace(/\?/g, () => '$' + (++i)), params];
+// Helper: execute raw SQL via Supabase REST API
+async function sql(strings: TemplateStringsArray, ...values: any[]) {
+  const query = strings.reduce((acc, s, i) => acc + s + (i < values.length ? '\$' + (i + 1) : ''), '');
+  const { data, error } = await getClient().rpc('exec_sql', { query, params: values });
+  if (error) throw error;
+  return data || [];
 }
 
 export function getDb() {
-  const p = getPool();
   return {
-    prepare(sql: string) {
-      const [q] = toPg(sql, []);
+    prepare(query: string) {
       return {
         async all(...params: any[]) {
-          const r = await p.query(q, params);
-          return r.rows;
+          let i = 0;
+          const q = query.replace(/\?/g, () => '\$' + (++i));
+          const { data, error } = await getClient().rpc('exec_sql', { query: q, params });
+          if (error) { throw new Error(`Supabase RPC error: ${JSON.stringify(error)}`); }
+          return data || [];
         },
         async get(...params: any[]) {
-          const r = await p.query(q, params);
-          return r.rows[0];
+          const rows = await this.all(...params);
+          return rows?.[0];
         },
         async run(...params: any[]) {
-          let s = q;
-          if (/\binsert\b/i.test(s) && !/returning/i.test(s)) s = s.replace(/;?\s*$/, ' RETURNING id');
-          const r = await p.query(s, params);
-          return { lastInsertRowid: r.rows[0]?.id || 0, changes: r.rowCount || 0 };
+          let i = 0;
+          let q = query.replace(/\?/g, () => '\$' + (++i));
+          if (/\binsert\b/i.test(q) && !/returning/i.test(q)) q = q.replace(/;?\s*\$/, ' RETURNING id');
+          const { data, error } = await getClient().rpc('exec_sql', { query: q, params });
+          if (error) { throw new Error(`Supabase RPC error (run): ${JSON.stringify(error)}`); }
+          return { lastInsertRowid: data?.[0]?.id || 0, changes: data?.length || 0 };
         },
       };
     },
     async transaction(fn: any) {
-      const client = await p.connect();
-      try {
-        await client.query('BEGIN');
-        await fn(async (sql: string, params: any[] = []) => {
-          let s = sql.replace(/\?/g, () => '$' + (++params.length || 1));
-          if (/\binsert\b/i.test(s) && !/returning/i.test(s)) s = s.replace(/;?\s*$/, ' RETURNING id');
-          const r = await client.query(s, params);
-          return { lastInsertRowid: r.rows[0]?.id || 0, changes: r.rowCount || 0 };
-        });
-        await client.query('COMMIT');
-      } catch (e) {
-        await client.query('ROLLBACK');
-        throw e;
-      } finally {
-        client.release();
-      }
+      await fn(async (q: string, p: any[] = []) => {
+        let i = 0;
+        let s = q.replace(/\?/g, () => '\$' + (++i));
+        if (/\binsert\b/i.test(s) && !/returning/i.test(s)) s = s.replace(/;?\s*\$/, ' RETURNING id');
+        const { data, error } = await getClient().rpc('exec_sql', { query: s, params: p });
+        if (error) throw error;
+        return { lastInsertRowid: data?.[0]?.id || 0, changes: data?.length || 0 };
+      });
     },
   };
 }
