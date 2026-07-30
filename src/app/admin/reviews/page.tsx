@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-interface Review { id: number; product_id: number; product_name: string; user_name: string; rating: number; comment: string; reply: string; created_at: string }
+interface Review { id: number; product_id: number; product_name: string; user_name: string; rating: number; comment: string; created_at: string }
 
 const STARS = [5,4,3,2,1];
 
@@ -10,8 +10,6 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [form, setForm] = useState({ product_id: '', user_name: '', rating: 5, comment: '' });
-  const [replyText, setReplyText] = useState<Record<number, string>>({});
-  const [replying, setReplying] = useState<number | null>(null);
 
   const load = () => fetch('/api/reviews').then(r => r.json()).then(setReviews);
   useEffect(() => {
@@ -23,17 +21,6 @@ export default function ReviewsPage() {
     if (!confirm('Delete this review?')) return;
     await fetch('/api/reviews', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     load();
-  };
-
-  const saveReply = async (id: number) => {
-    await fetch('/api/reviews', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, reply: replyText[id] || '' }) });
-    setReplying(null);
-    load();
-  };
-
-  const startReply = (r: Review) => {
-    setReplyText(prev => ({ ...prev, [r.id]: r.reply || '' }));
-    setReplying(r.id);
   };
 
   const add = async (e: React.FormEvent) => {
@@ -82,42 +69,14 @@ export default function ReviewsPage() {
 
       {/* Reviews List */}
       <table className="wp-table">
-        <thead><tr><th>Product</th><th>Customer</th><th>Rating</th><th>Comment</th><th>Reply</th><th>Date</th><th style={{ width: 140 }}>Actions</th></tr></thead>
+        <thead><tr><th>Product</th><th>Customer</th><th>Rating</th><th>Comment</th><th>Date</th><th style={{ width: 80 }}>Actions</th></tr></thead>
         <tbody>
           {reviews.map(r => (
             <tr key={r.id}>
               <td style={{ fontSize: 13 }}>{r.product_name || '—'}</td>
               <td style={{ fontSize: 13 }}>{r.user_name}</td>
               <td style={{ color: '#f0c33c' }}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</td>
-              <td style={{ fontSize: 13, color: '#646970', maxWidth: 250 }}>{r.comment}</td>
-              <td style={{ fontSize: 13, maxWidth: 250 }}>
-                {replying === r.id ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <textarea
-                      rows={3}
-                      value={replyText[r.id] || ''}
-                      onChange={e => setReplyText(prev => ({ ...prev, [r.id]: e.target.value }))}
-                      placeholder="Write a reply..."
-                      style={{ fontSize: 12, padding: '6px 8px', resize: 'vertical' }}
-                    />
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button onClick={() => saveReply(r.id)} className="wp-btn wp-btn-primary" style={{ padding: '3px 10px', fontSize: 11 }}>Save</button>
-                      <button onClick={() => setReplying(null)} className="wp-btn wp-btn-outline" style={{ padding: '3px 10px', fontSize: 11 }}>Cancel</button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    {r.reply ? (
-                      <div>
-                        <span style={{ color: '#2271b1', fontSize: 12, fontStyle: 'italic' }}>✓ {r.reply}</span>
-                        <button onClick={() => startReply(r)} style={{ display: 'block', marginTop: 4, fontSize: 11, color: '#646970', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>Edit</button>
-                      </div>
-                    ) : (
-                      <button onClick={() => startReply(r)} className="wp-btn wp-btn-outline" style={{ padding: '3px 10px', fontSize: 11 }}>Reply</button>
-                    )}
-                  </div>
-                )}
-              </td>
+              <td style={{ fontSize: 13, color: '#646970', maxWidth: 300 }}>{r.comment}</td>
               <td style={{ fontSize: 12, color: '#646970' }}>{new Date(r.created_at).toLocaleDateString()}</td>
               <td><button onClick={() => del(r.id)} className="wp-btn wp-btn-danger" style={{ padding: '4px 10px', fontSize: 12 }}>Delete</button></td>
             </tr>

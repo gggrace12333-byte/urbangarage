@@ -13,7 +13,6 @@ export default function ProductCard({ product }: { product: Product }) {
   const { formatPrice, t } = useLocale();
   const [hover, setHover] = useState(false);
   const images: string[] = typeof product.images === 'string' ? JSON.parse(product.images || '[]') : (product.images || []);
-  const firstImage: string = (() => { try { return Array.isArray(images) && images[0] && (images[0].startsWith('/') || images[0].startsWith('http')) ? images[0] : ''; } catch { return ''; } })();
   const tags = (product as any).tags ? (product as any).tags.split(',').map((t:string)=>t.trim()).filter(Boolean) : [];
   const hasSale = product.compare_at_price && product.compare_at_price > product.price;
   const isSoldOut = (product.inventory ?? 0) <= 0;
@@ -23,7 +22,7 @@ export default function ProductCard({ product }: { product: Product }) {
     <div onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)}>
       <Link href={`/products/${product.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
         <div style={{ position: 'relative', aspectRatio: '4/5', background: '#f5f1ea', overflow: 'hidden', borderRadius: 2, marginBottom: 12 }}>
-          {firstImage ? <Image src={firstImage} alt={product.name} fill style={{ objectFit: 'cover', opacity: isSoldOut ? 0.5 : 1, transition: 'transform 0.7s', transform: hover && !isSoldOut ? 'scale(1.05)' : 'scale(1)' }} sizes="33vw" /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9a978d', fontSize: 14 }}>No image</div>}
+          {images[0] ? <Image src={images[0]} alt={product.name} fill style={{ objectFit: 'cover', opacity: isSoldOut ? 0.5 : 1, transition: 'transform 0.7s', transform: hover && !isSoldOut ? 'scale(1.05)' : 'scale(1)' }} sizes="33vw" /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9a978d', fontSize: 14 }}>No image</div>}
           {isSoldOut && (
             <span style={{ position: 'absolute', top: 12, left: 12, background: '#14140f', color: '#fff', fontSize: 10, fontWeight: 600, padding: '3px 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('sold_out', 'SOLD OUT')}</span>
           )}

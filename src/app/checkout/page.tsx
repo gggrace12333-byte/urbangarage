@@ -45,7 +45,7 @@ export default function CheckoutPage() {
   const placeOrder = async () => {
     if (!validate()) return;
     setPlacing(true);
-    const res = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items,idempotencyToken:crypto.randomUUID(),customer:{name:form.firstName+' '+form.lastName,email:form.email,phone:form.phone,address_line1:form.address+(form.apartment?', '+form.apartment:''),city:form.city,state:form.state,postal_code:form.zip,country:form.country}})});
+    const res = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items,customer:{name:form.firstName+' '+form.lastName,email:form.email,phone:form.phone,address_line1:form.address+(form.apartment?', '+form.apartment:''),city:form.city,state:form.state,postal_code:form.zip,country:form.country}})});
     const data = await res.json();
     if (data.error) { setErrors({general:data.error}); setPlacing(false); return; }
     setOrderNum(data.orderNumber); setDone(true); clearCart();
@@ -129,29 +129,13 @@ export default function CheckoutPage() {
 
           <div style={{background:'#f9fafb',border:'1px solid #e5e7eb',borderRadius:12,padding:28,position:'sticky',top:100}}>
             <h2 style={{fontSize:18,fontWeight:500,color:'#14140f',marginBottom:24}}>{t('order_summary','Order Summary')}</h2>
-            {items.map((item, idx)=>{
-              const imgs = item.sku_images || (typeof item.product.images==='string' ? JSON.parse(item.product.images||'[]') : (item.product.images||[]));
-              const itemPrice = item.sku_price || item.product.price;
-              const itemCompare = item.sku_compare_at_price || item.product.compare_at_price;
-              const hasSale = itemCompare && itemCompare > itemPrice;
-              return (
-                <div key={`${item.product.id}-${item.sku_value||'default'}-${idx}`} style={{display:'flex',gap:14,marginBottom:16,paddingBottom:16,borderBottom:'1px solid #e5e7eb'}}>
-                  <div style={{width:64,height:64,background:'#f5f1ea',borderRadius:6,flexShrink:0,overflow:'hidden',position:'relative'}}>
-                    {imgs[0] && <Image src={imgs[0]} alt="" fill style={{objectFit:'cover'}} />}
-                  </div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <p style={{fontSize:14,fontWeight:500,color:'#14140f',margin:'0 0 4px'}}>{item.product.name}</p>
-                    {item.sku_value && item.sku_value !== 'Default' && <p style={{fontSize:11,color:'#6b7280',margin:'0 0 4px'}}>{item.sku_value}</p>}
-                    <p style={{fontSize:13,color:'#6b7280',margin:0}}>Qty: {item.quantity}</p>
-                    <div style={{display:'flex',alignItems:'baseline',gap:6,marginTop:4}}>
-                      <span style={{fontSize:13,fontWeight:600,color:hasSale?'#D63F1C':'#14140f'}}>{formatPrice(itemPrice)}</span>
-                      {hasSale && <span style={{fontSize:12,color:'#9ca3af',textDecoration:'line-through'}}>{formatPrice(itemCompare!)}</span>}
-                    </div>
-                  </div>
-                  <span style={{fontSize:14,fontWeight:600,color:'#14140f'}}>{formatPrice(itemPrice * item.quantity)}</span>
-                </div>
-              );
-            })}
+            {items.map(item=>{const imgs=typeof item.product.images==='string'?JSON.parse(item.product.images||'[]'):(item.product.images||[]);const hasSale=item.product.compare_at_price&&item.product.compare_at_price>item.product.price;return(
+              <div key={item.product.id} style={{display:'flex',gap:14,marginBottom:16,paddingBottom:16,borderBottom:'1px solid #e5e7eb'}}>
+                <div style={{width:64,height:64,background:'#f5f1ea',borderRadius:6,flexShrink:0,overflow:'hidden',position:'relative'}}>{imgs[0]&&<Image src={imgs[0]} alt="" fill style={{objectFit:'cover'}}/>}</div>
+                <div style={{flex:1,minWidth:0}}><p style={{fontSize:14,fontWeight:500,color:'#14140f',margin:'0 0 4px'}}>{item.product.name}</p><p style={{fontSize:13,color:'#6b7280',margin:0}}>Qty: {item.quantity}</p><div style={{display:'flex',alignItems:'baseline',gap:6,marginTop:4}}><span style={{fontSize:13,fontWeight:600,color:'#14140f'}}>{formatPrice(item.product.price)}</span>{hasSale&&<span style={{fontSize:12,color:'#9ca3af',textDecoration:'line-through'}}>{formatPrice(item.product.compare_at_price!)}</span>}</div></div>
+                <span style={{fontSize:14,fontWeight:600,color:'#14140f'}}>{formatPrice(item.product.price*item.quantity)}</span>
+              </div>
+            );})}
             <div style={{fontSize:14,color:'#4b5563'}}>
               <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
               <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}><span>Shipping</span><span>{shipping===0?'Free':formatPrice(shipping)}</span></div>

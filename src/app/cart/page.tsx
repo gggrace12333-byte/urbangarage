@@ -12,10 +12,6 @@ export default function CartPage() {
   const tax = Math.round(subtotal * 0.08 * 100) / 100;
   const total = Math.round((subtotal + shipping + tax) * 100) / 100;
 
-  const getItemPrice = (item: any) => item.sku_price || item.product.price;
-  const getCompareAt = (item: any) => item.sku_compare_at_price || item.product.compare_at_price;
-  const getImages = (item: any) => item.sku_images || (typeof item.product.images === 'string' ? JSON.parse(item.product.images || '[]') : (item.product.images || []));
-
   return (
     <div style={{ background: '#f5f1ea', minHeight: '100vh' }}>
       
@@ -31,36 +27,31 @@ export default function CartPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 48, alignItems: 'start' }}>
             <div>
-              {items.map((item, idx) => {
-                const imgs = getImages(item);
-                const price = getItemPrice(item);
-                const compareAt = getCompareAt(item);
-                const hasSale = compareAt && compareAt > price;
+              {items.map(item => {
+                const imgs: string[] = typeof item.product.images === 'string' ? JSON.parse(item.product.images || '[]') : (item.product.images || []);
+                const hasSale = item.product.compare_at_price && item.product.compare_at_price > item.product.price;
                 return (
-                  <div key={`${item.product.id}-${item.sku_value || 'default'}-${idx}`} style={{ display: 'flex', gap: 24, background: '#fff', padding: 20, marginBottom: 12, border: '1px solid #dfdfdf' }}>
+                  <div key={item.product.id} style={{ display: 'flex', gap: 24, background: '#fff', padding: 20, marginBottom: 12, border: '1px solid #dfdfdf' }}>
                     <div style={{ width: 100, height: 100, background: '#f5f1ea', flexShrink: 0, overflow: 'hidden' }}>
                       {imgs[0] && <Image src={imgs[0]} alt={item.product.name} width={100} height={100} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />}
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <div>
-                          <Link href={`/products/${item.product.slug}`} style={{ fontSize: 14, fontWeight: 500, color: '#14140f', textDecoration: 'none' }}>{item.product.name}</Link>
-                          {item.sku_value && item.sku_value !== 'Default' && <p style={{ fontSize: 12, color: '#77736b', margin: '2px 0 0' }}>{item.sku_value}</p>}
-                        </div>
-                        <button onClick={() => removeItem(idx)} style={{ background: 'none', border: 'none', color: '#9a978d', cursor: 'pointer', fontSize: 18 }}>×</button>
+                        <Link href={`/products/${item.product.slug}`} style={{ fontSize: 14, fontWeight: 500, color: '#14140f', textDecoration: 'none' }}>{item.product.name}</Link>
+                        <button onClick={() => removeItem(item.product.id)} style={{ background: 'none', border: 'none', color: '#9a978d', cursor: 'pointer', fontSize: 18 }}>×</button>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: hasSale ? '#D63F1C' : '#14140f' }}>{formatPrice(price)}</span>
-                        {hasSale && <span style={{ fontSize: 12, color: '#9a978d', textDecoration: 'line-through' }}>{formatPrice(compareAt!)}</span>}
-                        {hasSale && <span style={{ fontSize: 12, color: '#16a34a' }}>Save {formatPrice(compareAt! - price)}</span>}
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#14140f' }}>{formatPrice(item.product.price)}</span>
+                        {hasSale && <span style={{ fontSize: 12, color: '#9a978d', textDecoration: 'line-through' }}>{formatPrice(item.product.compare_at_price!)}</span>}
+                        {hasSale && <span style={{ fontSize: 12, color: '#16a34a' }}>Save {formatPrice(item.product.compare_at_price! - item.product.price)}</span>}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 12 }}>
                         <div style={{ display: 'flex', border: '1px solid #dfdfdf' }}>
-                          <button onClick={() => updateQuantity(idx, item.quantity - 1)} style={{ padding: '4px 12px', border: 'none', background: 'none', cursor: 'pointer', color: '#77736b' }}>−</button>
+                          <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} style={{ padding: '4px 12px', border: 'none', background: 'none', cursor: 'pointer', color: '#77736b' }}>−</button>
                           <span style={{ padding: '4px 12px', fontSize: 13, borderLeft: '1px solid #dfdfdf', borderRight: '1px solid #dfdfdf' }}>{item.quantity}</span>
-                          <button onClick={() => updateQuantity(idx, item.quantity + 1)} style={{ padding: '4px 12px', border: 'none', background: 'none', cursor: 'pointer', color: '#77736b' }}>+</button>
+                          <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} style={{ padding: '4px 12px', border: 'none', background: 'none', cursor: 'pointer', color: '#77736b' }}>+</button>
                         </div>
-                        <span style={{ fontSize: 13, color: '#77736b' }}>{formatPrice(price * item.quantity)}</span>
+                        <span style={{ fontSize: 13, color: '#77736b' }}>{formatPrice(item.product.price * item.quantity)}</span>
                       </div>
                     </div>
                   </div>

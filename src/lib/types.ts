@@ -16,11 +16,6 @@ export interface Product {
 
 export interface CartItem {
   product: Product;
-  sku_name?: string;
-  sku_value?: string;
-  sku_price?: number;
-  sku_compare_at_price?: number | null;
-  sku_images?: string[];
   quantity: number;
 }
 
@@ -41,8 +36,6 @@ export interface Order {
   tax: number;
   total: number;
   status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
-  tracking_number: string | null;
-  tracking_url: string | null;
   stripe_session_id: string | null;
   stripe_payment_intent: string | null;
   notes: string;
