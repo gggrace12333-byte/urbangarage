@@ -19,5 +19,5 @@ export async function GET(request: NextRequest) {
   if (category) { q += ' AND (c.name = ? OR c.slug = ?)'; params.push(category, category); }
   if (featured === '1') { q += ' AND p.featured = 1'; }
   q += ' ORDER BY p.featured DESC, p.created_at DESC';
-  return NextResponse.json(await db.prepare(q).all(...params));
+  const __r = await db.prepare(q).all(...params); return NextResponse.json(__r);
 }

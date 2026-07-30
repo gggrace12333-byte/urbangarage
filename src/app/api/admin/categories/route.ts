@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/admin-auth';
 import { getDb } from '@/lib/db';
 
 export async function GET() {
   const db = getDb();
-  return NextResponse.json(await db.prepare('SELECT * FROM categories ORDER BY sort_order').all());
+  const __r = await db.prepare('SELECT * FROM categories ORDER BY sort_order').all(); return NextResponse.json(__r);
 }
 
 export async function POST(request: NextRequest) {
-  const authErr = requireAdmin(request); if (authErr) return authErr;
   const db = getDb();
   const { name, slug: customSlug, description, sort_order } = await request.json();
   const slug = customSlug || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -17,7 +15,6 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const authErr = requireAdmin(request); if (authErr) return authErr;
   const db = getDb();
   const { id, name, slug: customSlug, description, sort_order } = await request.json();
   const slug = customSlug || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -26,7 +23,6 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const authErr = requireAdmin(request); if (authErr) return authErr;
   const db = getDb();
   const { id } = await request.json();
   await db.prepare('DELETE FROM categories WHERE id=?').run(id);

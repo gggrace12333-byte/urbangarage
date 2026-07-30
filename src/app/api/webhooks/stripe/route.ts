@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStripe } from '@/lib/stripe';
+import { stripe } from '@/lib/stripe';
 import { getDb } from '@/lib/db';
 import Stripe from 'stripe';
 
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = getStripe()?.webhooks.constructEvent(
+    event = stripe.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET || ''
@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
       const session = event.data.object as Stripe.Checkout.Session;
       const paymentIntent = session.payment_intent as string;
 
-      db.prepare(`
+      await db.prepare(`
         UPDATE orders
-        SET status = 'paid', stripe_payment_intent = ?, updated_at = NOW()
+        SET status = 'paid', stripe_payment_intent = ?, updated_at = datetime('now')
         WHERE stripe_session_id = ?
       `).run(paymentIntent, session.id);
       break;

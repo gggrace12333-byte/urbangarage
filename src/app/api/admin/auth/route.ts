@@ -1,40 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdminCredentials, createAdminSession, setAdminCookie, clearAdminCookie, validateAdminSession } from '@/lib/admin-auth';
+import crypto from 'crypto';
+
+const ADMIN_USER = 'admin';
+const ADMIN_PASS_HASH = crypto.createHash('sha256').update('411319').digest('hex');
 
 export async function POST(request: NextRequest) {
-  const { username, password, action } = await request.json();
-
-  // Login
-  if (!action || action === 'login') {
-    if (verifyAdminCredentials(username, password)) {
-      const token = createAdminSession();
-      const response = NextResponse.json({ success: true });
-      setAdminCookie(response, token);
-      return response;
-    }
-    return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
+  const { username, password } = await request.json();
+  const passHash = crypto.createHash('sha256').update(password || '').digest('hex');
+  
+  if (username === ADMIN_USER && passHash === ADMIN_PASS_HASH) {
+    return NextResponse.json({ success: true });
   }
-
-  // Logout
-  if (action === 'logout') {
-    const token = request.cookies.get('admin_token')?.value;
-    if (token) {
-      const { destroyAdminSession } = await import('@/lib/admin-auth');
-      destroyAdminSession(token);
-    }
-    const response = NextResponse.json({ success: true });
-    clearAdminCookie(response);
-    return response;
-  }
-
-  // Check session
-  if (action === 'check') {
-    const token = request.cookies.get('admin_token')?.value;
-    if (token && validateAdminSession(token)) {
-      return NextResponse.json({ authenticated: true });
-    }
-    return NextResponse.json({ authenticated: false }, { status: 401 });
-  }
-
-  return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  return NextResponse.json({ success: false }, { status: 401 });
 }

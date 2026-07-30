@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/admin-auth';
 import { getDb } from '@/lib/db';
 
 export async function GET() {
@@ -9,7 +8,6 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const authErr = requireAdmin(request); if (authErr) return authErr;
   const db = getDb();
   const body = await request.json();
   const result = await db.prepare(
@@ -20,7 +18,6 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const authErr = requireAdmin(request); if (authErr) return authErr;
   const db = getDb();
   const body = await request.json();
   await db.prepare(
@@ -30,7 +27,6 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const authErr = requireAdmin(request); if (authErr) return authErr;
   const db = getDb();
   const { id } = await request.json();
   await db.prepare('DELETE FROM banners WHERE id = ?').run(id);

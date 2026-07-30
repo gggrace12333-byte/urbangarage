@@ -8,12 +8,12 @@ export async function GET(request: NextRequest) {
     if (q.length > 100) return NextResponse.json([]);
     
     const db = getDb();
-    const results = db.prepare(
+    const results = await db.prepare(
       'SELECT id, name, slug, price, images FROM products WHERE active = 1 AND (name LIKE ? OR description LIKE ?) LIMIT 5'
     ).all(`%${q}%`, `%${q}%`);
     return NextResponse.json(results);
   } catch (error) {
-    // Search error — returning empty results
+    console.error('Search error:', error);
     return NextResponse.json([], { status: 200 });
   }
 }
