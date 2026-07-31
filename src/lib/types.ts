@@ -36,6 +36,8 @@ export interface Order {
   tax: number;
   total: number;
   status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+  tracking_number: string | null;
+  tracking_url: string | null;
   stripe_session_id: string | null;
   stripe_payment_intent: string | null;
   notes: string;
