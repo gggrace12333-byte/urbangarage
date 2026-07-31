@@ -1,9 +1,9 @@
 import nodemailer from 'nodemailer';
 import { getDb } from './db';
 
-function getSmtpConfig() {
+async function getSmtpConfig() {
   const db = getDb();
-  const rows = db.prepare("SELECT key, value FROM site_settings WHERE key IN ('smtp_host','smtp_port','smtp_user','smtp_pass')").all() as {key:string,value:string}[];
+  const rows: any[] = await db.prepare("SELECT key, value FROM site_settings WHERE key IN ('smtp_host','smtp_port','smtp_user','smtp_pass')").all();
   const s: Record<string,string> = {};
   for (const r of rows) s[r.key] = r.value;
   return {
@@ -15,7 +15,7 @@ function getSmtpConfig() {
 }
 
 export async function sendEmail(to: string, subject: string, html: string) {
-  const config = getSmtpConfig();
+  const config = await getSmtpConfig();
   if (!config.user || !config.pass) {
     console.log('[Email] SMTP not configured. Would have sent:', { to, subject });
     return;
@@ -35,7 +35,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
 }
 
 export async function notifyAdmin(subject: string, html: string) {
-  const config = getSmtpConfig();
+  const config = await getSmtpConfig();
   if (!config.user) return;
   await sendEmail(config.user, subject, html);
 }

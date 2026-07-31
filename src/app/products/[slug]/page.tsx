@@ -48,7 +48,7 @@ export default function ProductPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start', marginBottom: 80 }}>
           <div>
             <div style={{ aspectRatio: '1', background: '#f5f1ea', overflow: 'hidden', marginBottom: 12 }}>
-              {(selVariant !== null && variants[selVariant]?.image) ? <Image src={variants[selVariant].image} width={700} height={700} style={{width:'100%',height:'100%',objectFit:'cover'}} /> : images[selImg] ? <Image src={images[selImg]} alt={product.name} width={700} height={700} style={{width:'100%',height:'100%',objectFit:'cover'}} /> : <div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#9a978d'}}>Product image</div>}
+              {(selVariant !== null && variants[selVariant]?.image) ? <Image src={variants[selVariant].image} alt={product.name} width={700} height={700} style={{width:'100%',height:'100%',objectFit:'cover'}} /> : images[selImg] ? <Image src={images[selImg]} alt={product.name} width={700} height={700} style={{width:'100%',height:'100%',objectFit:'cover'}} /> : <div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#9a978d'}}>Product image</div>}
             </div>
             {images.length>1 && <div style={{display:'flex',gap:8}}>{images.map((img:string,i:number)=><button key={i} onClick={()=>setSelImg(i)} style={{width:72,height:72,background:'#f5f1ea',border:i===selImg?'2px solid #D63F1C':'2px solid transparent',cursor:'pointer',padding:0,overflow:'hidden'}}><Image src={img} alt="" width={72} height={72} style={{width:'100%',height:'100%',objectFit:'cover'}} /></button>)}</div>}
           </div>
