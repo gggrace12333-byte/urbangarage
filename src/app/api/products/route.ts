@@ -1,28 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+
+const SUPABASE_URL = 'https://ikjbbfgrwynixtpfdauj.supabase.co';
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const featured = searchParams.get('featured');
-    const slug = searchParams.get('slug');
-    const db = getDb();
+  const { searchParams } = new URL(request.url);
+  const category = searchParams.get('category');
+  const featured = searchParams.get('featured');
 
-    if (slug) {
-      const p = await db.prepare('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.slug = ? AND p.active = 1').get(slug);
-      if (!p) return NextResponse.json({error:'Not found'},{status:404});
-      return NextResponse.json(p);
-    }
+  let url = `${SUPABASE_URL}/rest/v1/products?select=*,categories(name)&active=eq.1&order=created_at.desc`;
+  if (featured === '1') url += '&featured=eq.1';
 
-    let q = 'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.active = 1';
-    const params: any[] = [];
-    if (category) { q += ' AND (c.name = ? OR c.slug = ?)'; params.push(category, category); }
-    if (featured === '1') { q += ' AND p.featured = 1'; }
-    q += ' ORDER BY p.featured DESC, p.created_at DESC';
-    const __r = await db.prepare(q).all(...params);
-    return NextResponse.json(__r);
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message, stack: e.stack }, { status: 500 });
-  }
+  const res = await fetch(url, {
+    headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
+  });
+  const data: any[] = await res.json();
+
+  const products = (data || []).map((p: any) => ({
+    ...p,
+    category_name: p.categories?.name,
+    images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []),
+  }));
+
+  return NextResponse.json(products);
 }

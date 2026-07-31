@@ -1,19 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+
+const SUPABASE_URL = 'https://ikjbbfgrwynixtpfdauj.supabase.co';
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+function headers() {
+  return {
+    'apikey': KEY,
+    'Authorization': `Bearer ${KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation',
+  };
+}
 
 export async function GET() {
-  const db = getDb();
-  const products = await db.prepare('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.created_at DESC').all();
-  return NextResponse.json(products);
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*,categories(name)&order=created_at.desc`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
+  const data = await res.json();
+  return NextResponse.json((data || []).map((p: any) => ({ ...p, category_name: p.categories?.name })));
 }
 
 export async function POST(request: NextRequest) {
-  const db = getDb();
   const body = await request.json();
-  const slug = body.slug || body.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  const r = await db.prepare(`INSERT INTO products (name,slug,description,price,compare_at_price,images,category_id,tags,sku,featured,inventory,active) VALUES (?,?,?,?,?,?,?,?,?,?,?)`).run(
-    body.name, slug, body.description||'', body.price, body.compare_at_price||null, JSON.stringify(body.images||[]), body.category_id||null, body.tags||'', body.featured?1:0, body.inventory||100, body.active!==false?1:0
-  );
-  const p = await db.prepare('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?').get(r.lastInsertRowid);
-  return NextResponse.json(p, {status:201});
+  const slug = body.slug || body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  
+  const product = {
+    name: body.name,
+    slug,
+    description: body.description || '',
+    price: body.price || 0,
+    compare_at_price: body.compare_at_price || null,
+    images: JSON.stringify(body.images || []),
+    category_id: body.category_id || null,
+    tags: body.tags || '',
+    featured: body.featured ? 1 : 0,
+    inventory: body.inventory || 100,
+    active: body.active !== false ? 1 : 0,
+  };
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/products`, { method: 'POST', headers: headers(), body: JSON.stringify(product) });
+  const data = await res.json();
+  return NextResponse.json(data?.[0] || data, { status: 201 });
 }

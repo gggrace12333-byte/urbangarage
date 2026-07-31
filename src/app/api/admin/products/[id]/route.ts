@@ -1,17 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+
+const SUPABASE_URL = 'https://ikjbbfgrwynixtpfdauj.supabase.co';
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+function headers() {
+  return {
+    'apikey': KEY,
+    'Authorization': `Bearer ${KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation',
+  };
+}
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const db = getDb(); const { id } = await params; const body = await request.json();
-  await db.prepare('UPDATE products SET name=?,description=?,price=?,compare_at_price=?,images=?,category_id=?,tags=?,featured=?,inventory=?,active=?,updated_at=datetime(\'now\') WHERE id=?').run(
-    body.name, body.description||'', body.price, body.compare_at_price||null, JSON.stringify(body.images||[]), body.category_id||null, body.tags||'', body.sku||'', body.featured?1:0, body.inventory||0, body.active!==false?1:0, id
-  );
-  const p = await db.prepare('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?').get(id);
-  return NextResponse.json(p);
+  const { id } = await params;
+  const body = await request.json();
+
+  const updates: Record<string, any> = {
+    name: body.name,
+    description: body.description || '',
+    price: body.price || 0,
+    compare_at_price: body.compare_at_price || null,
+    images: JSON.stringify(body.images || []),
+    category_id: body.category_id || null,
+    tags: body.tags || '',
+    featured: body.featured ? 1 : 0,
+    inventory: body.inventory || 0,
+    active: body.active !== false ? 1 : 0,
+    updated_at: new Date().toISOString(),
+  };
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: headers(),
+    body: JSON.stringify(updates),
+  });
+  const data = await res.json();
+  return NextResponse.json(data?.[0] || data);
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const db = getDb(); const { id } = await params;
-  await db.prepare('DELETE FROM products WHERE id=?').run(id);
-  return NextResponse.json({success:true});
+  const { id } = await params;
+  await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
+  });
+  return NextResponse.json({ success: true });
 }
