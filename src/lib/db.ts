@@ -52,7 +52,7 @@ export function getDb() {
             if (orderMatch) {
               const orderPart = orderMatch[1].trim().replace(/^[a-z]+\./i, '');
               const dir = (orderMatch[2] || '').trim().toLowerCase() === 'desc' ? 'desc' : 'asc';
-              path += `&order=${col}.${dir}`;
+              path += `&order=${orderPart}.${dir}`;
             }
             const limitMatch = sql.match(/limit\s+(\d+)/i);
             if (limitMatch) path += `&limit=${limitMatch[1]}`;
