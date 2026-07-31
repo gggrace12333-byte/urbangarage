@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
-import { getDb } from '@/lib/db';
 import Stripe from 'stripe';
+import { getDb } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: 'Stripe not configured' }, { status: 501 });
+  }
+  
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2026-06-24.dahlia' });
   const body = await request.text();
   const signature = request.headers.get('stripe-signature') || '';
 
@@ -26,11 +30,7 @@ export async function POST(request: NextRequest) {
       const session = event.data.object as Stripe.Checkout.Session;
       const paymentIntent = session.payment_intent as string;
 
-      await db.prepare(`
-        UPDATE orders
-        SET status = 'paid', stripe_payment_intent = ?, updated_at = datetime('now')
-        WHERE stripe_session_id = ?
-      `).run(paymentIntent, session.id);
+      db.prepare('UPDATE orders SET status = ?, stripe_payment_intent = ?, updated_at = NOW() WHERE stripe_session_id = ?').run('paid', paymentIntent, session.id);
       break;
     }
   }
