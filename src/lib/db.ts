@@ -48,12 +48,11 @@ export function getDb() {
                 }
               }
             }
-            const orderMatch = sql.match(/order by\s+(.+?)(\s+limit\s+|\s*$)/i);
+            const orderMatch = sql.match(/order by\s+([^,]+?)(\s+desc|\s+asc)?(\s+limit\s+|\s*$)/i);
             if (orderMatch) {
-              const orderPart = orderMatch[1].trim();
-              const desc = orderPart.toLowerCase().endsWith(' desc');
-              const col = orderPart.replace(/\s+desc$/i, '').trim();
-              path += `&order=${col}.${desc ? 'desc' : 'asc'}`;
+              const orderPart = orderMatch[1].trim().replace(/^[a-z]+\./i, '');
+              const dir = (orderMatch[2] || '').trim().toLowerCase() === 'desc' ? 'desc' : 'asc';
+              path += `&order=${col}.${dir}`;
             }
             const limitMatch = sql.match(/limit\s+(\d+)/i);
             if (limitMatch) path += `&limit=${limitMatch[1]}`;
