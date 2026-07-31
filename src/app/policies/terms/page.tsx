@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 export default function TermsPage() {
   const [s, setS] = useState<Record<string,string>>({});
   useEffect(() => { fetch('/api/admin/settings').then(r => r.json()).then(setS); }, []);
