@@ -1,7 +1,10 @@
-const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ikjbbfgrwynixtpfdauj.supabase.co').replace(/\/$/, '');
+const SUPABASE_URL = 'https://ikjbbfgrwynixtpfdauj.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
 
+let isBuild = process.env.NEXT_PHASE === 'phase-production-build';
+
 async function rest(method: string, path: string, body?: any) {
+  if (isBuild) return [];
   const url = `${SUPABASE_URL}/rest/v1/${path}`;
   const headers: Record<string, string> = {
     'apikey': SUPABASE_KEY,
@@ -9,20 +12,24 @@ async function rest(method: string, path: string, body?: any) {
     'Content-Type': 'application/json',
   };
   if (method === 'POST' || method === 'PATCH') headers['Prefer'] = 'return=representation';
-  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Supabase ${method} ${path}: ${res.status} - ${err}`);
+  try {
+    const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Supabase ${method} ${path}: ${res.status} - ${err}`);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : [];
+  } catch (e) {
+    if (isBuild) return [];
+    throw e;
   }
-  const text = await res.text();
-  return text ? JSON.parse(text) : [];
 }
 
 export function getDb() {
   const db = {
     prepare(sql: string) {
       const q = sql.toLowerCase().trim();
-      const self = this as any;
       return {
         async all(...p: any[]) {
           if (q.startsWith('select')) {
