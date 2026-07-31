@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+
+const URL = 'https://ikjbbfgrwynixtpfdauj.supabase.co';
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const H = () => ({ apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' });
 
 export async function GET() {
-  const db = getDb();
-  const rows = await db.prepare('SELECT * FROM site_settings').all() as { key: string; value: string }[];
+  const r = await fetch(`${URL}/rest/v1/site_settings?select=*`, { headers: H() });
+  const rows: any[] = await r.json();
   const settings: Record<string, string> = {};
-  for (const r of rows) settings[r.key] = r.value;
+  for (const row of rows) settings[row.key] = row.value;
   return NextResponse.json(settings);
 }
 
 export async function POST(request: NextRequest) {
-  const db = getDb();
   const body = await request.json();
-  const upsert = await db.prepare('INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)');
   for (const [k, v] of Object.entries(body)) {
-    upsert.run(k, String(v));
+    // Upsert: delete then insert
+    await fetch(`${URL}/rest/v1/site_settings?key=eq.${encodeURIComponent(k)}`, { method: 'DELETE', headers: H() });
+    await fetch(`${URL}/rest/v1/site_settings`, { method: 'POST', headers: { ...H(), Prefer: 'return=minimal' }, body: JSON.stringify({ key: k, value: String(v) }) });
   }
   return NextResponse.json({ success: true });
 }

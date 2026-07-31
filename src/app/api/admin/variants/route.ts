@@ -1,32 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+
+const URL = 'https://ikjbbfgrwynixtpfdauj.supabase.co';
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const H = () => ({ apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' });
 
 export async function GET(request: NextRequest) {
-  const db = getDb();
-  const productId = request.nextUrl.searchParams.get('product_id');
-  if (productId) {
-    const __r = await db.prepare('SELECT * FROM product_variants WHERE product_id = ? ORDER BY sort_order').all(productId); return NextResponse.json(__r);
-  }
-  return NextResponse.json([]);
+  const pid = request.nextUrl.searchParams.get('product_id');
+  if (!pid) return NextResponse.json([]);
+  const r = await fetch(`${URL}/rest/v1/product_variants?select=*&product_id=eq.${pid}&order=sort_order`, { headers: H() });
+  return NextResponse.json(await r.json());
 }
 
 export async function POST(request: NextRequest) {
-  const db = getDb();
-  const { product_id, name, value, price_adjustment, inventory, sort_order } = await request.json();
-  const r = await db.prepare('INSERT INTO product_variants (product_id, name, value, image, price_adjustment, inventory, sort_order) VALUES (?,?,?,?,?,?,?)').run(product_id, name, value || '', price_adjustment || 0, inventory || 0, sort_order || 0);
-  return NextResponse.json(await db.prepare('SELECT * FROM product_variants WHERE id = ?').get(r.lastInsertRowid), { status: 201 });
+  const b = await request.json();
+  const r = await fetch(`${URL}/rest/v1/product_variants`, { method: 'POST', headers: { ...H(), Prefer: 'return=representation' }, body: JSON.stringify({ product_id: b.product_id, name: b.name, value: b.value||'', image: b.image||'', price_adjustment: b.price_adjustment||0, inventory: b.inventory||0, sort_order: b.sort_order||0 }) });
+  return NextResponse.json((await r.json())?.[0], { status: 201 });
 }
 
 export async function PUT(request: NextRequest) {
-  const db = getDb();
-  const { id, name, value, price_adjustment, inventory, sort_order } = await request.json();
-  await db.prepare('UPDATE product_variants SET name=?, value=?, image=?, price_adjustment=?, inventory=?, sort_order=? WHERE id=?').run(name, value || '', price_adjustment || 0, inventory || 0, sort_order || 0, id);
+  const b = await request.json();
+  await fetch(`${URL}/rest/v1/product_variants?id=eq.${b.id}`, { method: 'PATCH', headers: { ...H(), Prefer: 'return=minimal' }, body: JSON.stringify({ name: b.name, value: b.value||'', image: b.image||'', price_adjustment: b.price_adjustment||0, inventory: b.inventory||0, sort_order: b.sort_order||0 }) });
   return NextResponse.json({ success: true });
 }
 
 export async function DELETE(request: NextRequest) {
-  const db = getDb();
   const { id } = await request.json();
-  await db.prepare('DELETE FROM product_variants WHERE id = ?').run(id);
+  await fetch(`${URL}/rest/v1/product_variants?id=eq.${id}`, { method: 'DELETE', headers: H() });
   return NextResponse.json({ success: true });
 }

@@ -1,25 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+
+const URL = 'https://ikjbbfgrwynixtpfdauj.supabase.co';
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const H = () => ({ apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' });
 
 export async function GET(request: NextRequest) {
-  const db = getDb();
-  const productId = request.nextUrl.searchParams.get('product_id');
-  if (productId) {
-    const __r = await db.prepare('SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC').all(productId); return NextResponse.json(__r);
+  const pid = request.nextUrl.searchParams.get('product_id');
+  if (pid) {
+    const r = await fetch(`${URL}/rest/v1/reviews?select=*&product_id=eq.${pid}&order=created_at.desc`, { headers: H() });
+    return NextResponse.json(await r.json());
   }
-  const __r = await db.prepare('SELECT r.*, p.name as product_name FROM reviews r LEFT JOIN products p ON r.product_id = p.id ORDER BY r.created_at DESC').all(); return NextResponse.json(__r);
+  const r = await fetch(`${URL}/rest/v1/reviews?select=*,products(name)&order=created_at.desc`, { headers: H() });
+  const rows: any[] = await r.json();
+  return NextResponse.json(rows.map(row => ({ ...row, product_name: row.products?.name })));
 }
 
 export async function POST(request: NextRequest) {
-  const db = getDb();
-  const { product_id, user_name, rating, comment } = await request.json();
-  const r = await db.prepare('INSERT INTO reviews (product_id, user_name, rating, comment) VALUES (?,?,?,?)').run(product_id, user_name, rating, comment || '');
-  return NextResponse.json(await db.prepare('SELECT * FROM reviews WHERE id = ?').get(r.lastInsertRowid), { status: 201 });
+  const b = await request.json();
+  const r = await fetch(`${URL}/rest/v1/reviews`, { method: 'POST', headers: { ...H(), Prefer: 'return=representation' }, body: JSON.stringify({ product_id: b.product_id, user_name: b.user_name, rating: b.rating, comment: b.comment||'' }) });
+  return NextResponse.json((await r.json())?.[0], { status: 201 });
 }
 
 export async function DELETE(request: NextRequest) {
-  const db = getDb();
   const { id } = await request.json();
-  await db.prepare('DELETE FROM reviews WHERE id = ?').run(id);
+  await fetch(`${URL}/rest/v1/reviews?id=eq.${id}`, { method: 'DELETE', headers: H() });
   return NextResponse.json({ success: true });
 }
