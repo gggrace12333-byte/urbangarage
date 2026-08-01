@@ -63,15 +63,6 @@ export default function Footer() {
           <p style={{ fontSize: 12, color: '#555', margin: 0 }}>&copy; {new Date().getFullYear()} Urban Garage. All rights reserved.</p>
         </div>
       </div>
-
-    <style jsx>{`
-      @media (max-width: 768px) {
-        footer { padding: 40px 0 0 !important; }
-        footer div[style*="repeat(4"] { grid-template-columns: repeat(2, 1fr) !important; gap: 24px !important; }
-        footer div[style*="marginBottom: 64px"] { margin-bottom: 32px !important; }
-        div[style*="padding: '0 48px'"] { padding: 0 16px !important; }
-      }
-    `}</style>
     </footer>
   );
 }
