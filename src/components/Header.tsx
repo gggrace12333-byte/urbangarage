@@ -139,7 +139,7 @@ export default function Header({ serverCategories = [], serverSettings = {} }: H
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
             {/* Search */}
-            <div ref={searchRef} style={{ position: 'relative' }}>
+            <div ref={searchRef} className="desktop-search" style={{ position: 'relative' }}>
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
                 style={{ background: 'none', border: 'none', color: '#77736b', cursor: 'pointer', padding: 0 }}
@@ -186,6 +186,38 @@ export default function Header({ serverCategories = [], serverSettings = {} }: H
           </div>
         </div>
 
+
+          {/* Mobile Search Bar */}
+          <div className="mobile-search-bar" style={{ width: '100%', padding: '0 12px 12px' }}>
+            <div style={{ display: 'flex', gap: 8, position: 'relative' }}>
+              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search..." style={{ flex: 1, padding: '10px 12px', border: '1px solid #333', background: '#111', color: '#fff', fontSize: 14, borderRadius: 4, outline: 'none' }} />
+              <Link href="/cart" style={{ color: '#77736b', display: 'flex', position: 'relative', flexShrink: 0 }} aria-label="Cart">
+                <ShoppingBag size={22} />
+                {itemCount > 0 && (
+                  <span style={{ position: 'absolute', top: -6, right: -6, background: '#D63F1C', color: '#fff', fontSize: 10, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>{itemCount}</span>
+                )}
+              </Link>
+            </div>
+            {searchQuery.length >= 2 && (
+              <div style={{ marginTop: 8, background: '#111', border: '1px solid #333', maxHeight: 300, overflow: 'auto' }}>
+                {searchResults.map((p: any) => {
+                  const imgs = typeof p.images === 'string' ? JSON.parse(p.images || '[]') : (p.images || []);
+                  return (
+                    <Link key={p.id} href={`/products/${p.slug}`} onClick={() => { setSearchQuery(''); setSearchResults([]); }} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', textDecoration: 'none', borderBottom: '1px solid #222' }}>
+                      <div style={{ width: 36, height: 36, background: '#1a1a1a', flexShrink: 0 }}>
+                        {imgs[0] && <img src={imgs[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 13, fontWeight: 500, color: '#fff', margin: 0 }}>{p.name}</p>
+                        <p style={{ fontSize: 12, color: '#999', margin: 0 }}>${p.price?.toFixed(2)}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
         {/* Mobile nav */}
         {open && (
           <div className="mobile-nav" style={{ background: '#000', borderTop: '1px solid rgba(255,255,255,0.1)', padding: '24px 48px' }}>
@@ -199,13 +231,19 @@ export default function Header({ serverCategories = [], serverSettings = {} }: H
       <style jsx>{`
         .mobile-menu-btn { display: none; }
         .desktop-nav { display: flex; }
-        @media (max-width: 1023px) {
+        .desktop-search { display: flex; }
+        .mobile-search-bar { display: none; }
+        @media (max-width: 768px) {
           .desktop-nav { display: none; }
+          .desktop-search { display: none; }
           .mobile-menu-btn { display: block; }
-          .header-inner { padding: 0 24px; }
+          .mobile-search-bar { display: flex; }
+          .header-inner { padding: 0 12px !important; height: 52px !important; }
+          .mobile-nav { padding: 16px !important; }
         }
-        @media (min-width: 1024px) {
+        @media (min-width: 769px) {
           .mobile-nav { display: none; }
+          .mobile-search-bar { display: none; }
         }
       `}</style>
     </>
