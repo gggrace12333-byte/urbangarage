@@ -102,6 +102,7 @@ export default function Header({ serverCategories = [], serverSettings = {} }: H
               </>
             )}
 
+            {isMobile && <Link href="/account" style={{ color: '#77736b', display: 'flex' }}><User size={22} /></Link>}
             <Link href="/cart" style={{ color: '#77736b', display: 'flex', position: 'relative' }}>
               <ShoppingBag size={isMobile ? 22 : 18} />
               {itemCount > 0 && <span style={{ position: 'absolute', top: -6, right: -6, background: '#D63F1C', color: '#fff', fontSize: 10, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>{itemCount}</span>}
