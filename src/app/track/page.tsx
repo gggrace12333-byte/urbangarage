@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useIsMobile } from '@/lib/useIsMobile';
 
 export default function TrackPage() {
+  const isMobile = useIsMobile();
   const [email, setEmail] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);

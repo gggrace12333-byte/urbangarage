@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import { useIsMobile } from '@/lib/useIsMobile';
 import { useParams } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
 import { Product } from '@/lib/types';
@@ -24,13 +25,13 @@ function CategoryContent() {
   return (
     <>
       <div style={{ borderBottom: '1px solid #dfdfdf', background: '#fff' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '80px 48px 40px' }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: isMobile ? '40px 16px 20px' : '80px 48px 40px' }}>
           <h1 style={{ fontSize: 48, fontWeight: 200, color: '#14140f', margin: 0 }}>{catName}</h1>
         </div>
       </div>
-      <div style={{ background: '#f5f1ea', padding: '64px 0', minHeight: '50vh' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 48px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+      <div style={{ background: '#f5f1ea', padding: isMobile ? '32px 0' : '64px 0', minHeight: '50vh' }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: isMobile ? '0 16px' : '0 48px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: isMobile ? 12 : 32 }}>
             {products.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
         </div>
@@ -40,6 +41,7 @@ function CategoryContent() {
 }
 
 export default function CategoryPage() {
+  const isMobile = useIsMobile();
   return (
     <div style={{ background: '#fff' }}>
       

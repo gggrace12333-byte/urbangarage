@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useIsMobile } from '@/lib/useIsMobile';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function RegisterPage() {
+  const isMobile = useIsMobile();
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

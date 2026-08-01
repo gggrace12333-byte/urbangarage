@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useIsMobile } from '@/lib/useIsMobile';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import ProductCard from '@/components/ProductCard';
@@ -8,6 +9,7 @@ import { useCart } from '@/components/CartProvider';
 import { useLocale } from '@/components/LocaleProvider';
 
 export default function ProductPage() {
+  const isMobile = useIsMobile();
   const params = useParams();
   const { addItem } = useCart();
   const { formatPrice, t } = useLocale();
@@ -45,7 +47,7 @@ export default function ProductPage() {
       
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '80px 48px 0' }}>
         {/* Top: Images + Info */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start', marginBottom: 80 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 64, alignItems: 'start', marginBottom: 80 }}>
           <div>
             <div style={{ aspectRatio: '1', background: '#f5f1ea', overflow: 'hidden', marginBottom: 12 }}>
               {(selVariant !== null && variants[selVariant]?.image) ? <Image src={variants[selVariant].image} alt={product.name} width={700} height={700} style={{width:'100%',height:'100%',objectFit:'cover'}} /> : images[selImg] ? <Image src={images[selImg]} alt={product.name} width={700} height={700} style={{width:'100%',height:'100%',objectFit:'cover'}} /> : <div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',color:'#9a978d'}}>Product image</div>}
@@ -201,7 +203,7 @@ export default function ProductPage() {
         {related.length > 0 && (
           <div style={{ marginTop: 80, paddingTop: 80, borderTop: '1px solid #dfdfdf' }}>
             <h2 style={{ fontSize: 22, fontWeight: 300, color: '#14140f', marginBottom: 32, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('you_may_like','You May Also Like')}</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: isMobile ? 12 : 32 }}>
               {related.map((p: any) => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>

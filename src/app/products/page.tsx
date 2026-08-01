@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import { useIsMobile } from '@/lib/useIsMobile';
 import ProductCard from '@/components/ProductCard';
 import { Product } from '@/lib/types';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -63,8 +64,8 @@ function ProductsContent() {
       </div>
 
       <div style={{ background: '#f5f1ea', padding: '48px 0 80px' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 48px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: isMobile ? '0 16px' : '0 48px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: isMobile ? 12 : 32 }}>
             {sorted.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
         </div>
@@ -74,6 +75,7 @@ function ProductsContent() {
 }
 
 export default function ProductsPage() {
+  const isMobile = useIsMobile();
   return (
     <div style={{ background: '#fff' }}>
       

@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useIsMobile } from '@/lib/useIsMobile';
 import Link from 'next/link';
 
 export default function AccountPage() {
+  const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [email, setEmail] = useState('');
