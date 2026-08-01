@@ -6,6 +6,7 @@ import AnnouncementBar from '@/components/AnnouncementBar';
 import { Search, ShoppingBag, Menu, X, User } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import { useIsMobile } from '@/lib/useIsMobile';
 
 interface HeaderProps {
   serverCategories?: any[];
@@ -14,6 +15,7 @@ interface HeaderProps {
 
 export default function Header({ serverCategories = [], serverSettings = {} }: HeaderProps) {
   const pathname = usePathname();
+  const isMobile = useIsMobile();
   const { itemCount } = useCart();
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -139,7 +141,7 @@ export default function Header({ serverCategories = [], serverSettings = {} }: H
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
             {/* Search */}
-            <div ref={searchRef} className="desktop-search" style={{ position: 'relative' }}>
+            {!isMobile && <div ref={searchRef} className="desktop-search" style={{ position: 'relative' }}>
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
                 style={{ background: 'none', border: 'none', color: '#77736b', cursor: 'pointer', padding: 0 }}
@@ -171,6 +173,7 @@ export default function Header({ serverCategories = [], serverSettings = {} }: H
                 </div>
               )}
             </div>
+            </div>}
 
             <Link href="/account" style={{ color: '#77736b', display: 'flex' }} aria-label="Account"><User size={18} /></Link>
             <Link href="/cart" style={{ color: '#77736b', display: 'flex', position: 'relative' }} aria-label="Cart">
@@ -188,7 +191,7 @@ export default function Header({ serverCategories = [], serverSettings = {} }: H
 
 
           {/* Mobile Search Bar */}
-          <div className="mobile-search-bar" style={{ width: '100%', padding: '0 12px 12px' }}>
+          {isMobile && <div className="mobile-search-bar" style={{ width: '100%', padding: '0 12px 12px' }}>
             <div style={{ display: 'flex', gap: 8, position: 'relative' }}>
               <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search..." style={{ flex: 1, padding: '10px 12px', border: '1px solid #333', background: '#111', color: '#fff', fontSize: 14, borderRadius: 4, outline: 'none' }} />
               <Link href="/cart" style={{ color: '#77736b', display: 'flex', position: 'relative', flexShrink: 0 }} aria-label="Cart">
