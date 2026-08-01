@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Suspense } from 'react';
@@ -21,6 +20,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   for (const r of settingsRows) serverSettings[r.key] = r.value;
 
   return (
-    <html lang="en"><body className={inter.className}><LocaleProvider><CartProvider><AnalyticsTracker /><Suspense fallback={null}><ClientShell serverCategories={JSON.parse(JSON.stringify(categories))} serverSettings={serverSettings}>{children}</ClientShell></Suspense></CartProvider></LocaleProvider></body></html>
+    <html lang="en"><body className={inter.className}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media (max-width: 768px) {
+          section[style] { padding: 40px 16px !important; }
+          div[style*="max-width:1400"], div[style*="maxWidth:1400"] { padding: 0 16px !important; }
+          div[style*="repeat(3, 1fr)"] { grid-template-columns: 1fr !important; gap: 12px !important; }
+          div[style*="repeat(4, 1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+          div[style*="1fr 1fr"] { grid-template-columns: 1fr !important; }
+          section[style*="60vh"], section[style*="70vh"] { min-height: 35vh !important; }
+          footer { padding: 40px 0 0 !important; }
+          h1 { font-size: 24px !important; }
+          h2 { font-size: 20px !important; }
+        }
+      `}} />
+      <LocaleProvider><CartProvider><AnalyticsTracker /><Suspense fallback={null}><ClientShell serverCategories={JSON.parse(JSON.stringify(categories))} serverSettings={serverSettings}>{children}</ClientShell></Suspense></CartProvider></LocaleProvider>
+    </body></html>
   );
 }
