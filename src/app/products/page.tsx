@@ -43,9 +43,9 @@ function ProductsContent() {
               fontSize: 13, fontWeight: 500, cursor: 'pointer', borderRadius: 2
             }}>All</button>
             {categories.map((c: any) => (
-              <button key={c.id} onClick={() => router.push(`/products?category=${encodeURIComponent(c.name)}`)} style={{
-                padding: '8px 20px', border: cat === c.name ? '1px solid #14140f' : '1px solid #dfdfdf',
-                background: cat === c.name ? '#14140f' : '#fff', color: cat === c.name ? '#fff' : '#14140f',
+              <button key={c.id} onClick={() => router.push(`/products?category=${encodeURIComponent(c.slug)}`)} style={{
+                padding: '8px 20px', border: cat === c.slug ? '1px solid #14140f' : '1px solid #dfdfdf',
+                background: cat === c.slug ? '#14140f' : '#fff', color: cat === c.slug ? '#fff' : '#14140f',
                 fontSize: 13, fontWeight: 500, cursor: 'pointer', borderRadius: 2
               }}>{c.name}</button>
             ))}
