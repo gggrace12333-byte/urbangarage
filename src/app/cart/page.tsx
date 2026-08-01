@@ -3,9 +3,11 @@
 import Image from 'next/image';
 import { useCart } from '@/components/CartProvider';
 import { useLocale } from '@/components/LocaleProvider';
+import { useIsMobile } from '@/lib/useIsMobile';
 import Link from 'next/link';
 
 export default function CartPage() {
+  const isMobile = useIsMobile();
   const { items, removeItem, updateQuantity, subtotal, itemCount } = useCart();
   const { formatPrice, t } = useLocale();
   const shipping = subtotal >= 50 ? 0 : 5.99;
@@ -15,9 +17,9 @@ export default function CartPage() {
   return (
     <div style={{ background: '#f5f1ea', minHeight: '100vh' }}>
       
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '120px 48px 80px' }}>
-        <h1 style={{ fontSize: 36, fontWeight: 200, color: '#14140f', marginBottom: 4 }}>YOUR BAG</h1>
-        <p style={{ fontSize: 14, color: '#77736b', marginBottom: 48 }}>{itemCount} item{itemCount !== 1 ? 's' : ''} in your cart</p>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: isMobile ? '80px 16px 60px' : '120px 48px 80px' }}>
+        <h1 style={{ fontSize: isMobile ? 26 : 36, fontWeight: 200, color: '#14140f', marginBottom: 4 }}>YOUR BAG</h1>
+        <p style={{ fontSize: 14, color: '#77736b', marginBottom: isMobile ? 32 : 48 }}>{itemCount} item{itemCount !== 1 ? 's' : ''} in your cart</p>
         {items.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0', background: '#fff', border: '1px solid #dfdfdf' }}>
             <p style={{ fontSize: 48, marginBottom: 16 }}>🛍️</p>

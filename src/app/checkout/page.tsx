@@ -5,10 +5,12 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/components/CartProvider';
 import { useLocale } from '@/components/LocaleProvider';
+import { useIsMobile } from '@/lib/useIsMobile';
 import { COUNTRIES, getStatesForCountry } from '@/lib/countries';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
+  const isMobile = useIsMobile();
   const router = useRouter();
   const { items, subtotal, clearCart } = useCart();
   const { formatPrice, t } = useLocale();
