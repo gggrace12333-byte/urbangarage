@@ -10,87 +10,46 @@
   --color-border: #dfdfdf;
 }
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-::selection { background: rgba(214, 63, 28, 0.15); color: var(--color-text); }
+
+::selection {
+  background: rgba(214, 63, 28, 0.15);
+  color: var(--color-text);
+}
 
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-.animate-marquee { animation: marquee 20s linear infinite; }
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-up { animation: fadeUp 0.6s ease-out forwards; }
 
+.animate-fade-up {
+  animation: fadeUp 0.6s ease-out forwards;
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #f5f1ea; }
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
-/* MOBILE RESPONSIVE */
-@media (max-width: 768px) {
-  /* Sections padding */
-  section[style*="padding: 120px"], 
-  section[style*="padding: '120px"] { padding: 60px 16px !important; }
-  section[style*="padding: '80px"] { padding: 40px 16px !important; }
-  
-  /* Containers */
-  div[style*="maxWidth: 1400"][style*="padding: '0 48px'"],
-  div[style*="maxWidth: 1400"][style*="padding: 0 48px"] { padding: 0 16px !important; }
-
-  /* Grid layouts */
-  div[style*="repeat(3, 1fr)"] { grid-template-columns: 1fr !important; }
-  div[style*="repeat(4, 1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
-  
-  /* Hero */
-  section[style*="minHeight: 60vh"] { min-height: 35vh !important; }
-  section[style*="minHeight: 70vh"] { min-height: 40vh !important; }
-
-  /* Featured 2-col */
-  div[style*="1fr 1fr"][style*="gap: 64px"] { grid-template-columns: 1fr !important; gap: 24px !important; }
-  div[style*="1fr 1fr"][style*="gap: 80px"] { grid-template-columns: 1fr !important; gap: 24px !important; flex-direction: column !important; }
-
-  /* How it works cards */
-  div[style*="grid-template-columns: repeat(3, 1fr)"][style*="gap: 24px"] { gap: 12px !important; }
-
-  /* Shop page product grid */
-  .woocommerce ul.products, ul.products { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
-
-  /* Product card */
-  div[style*="aspectRatio: '4/3'"] { aspect-ratio: 1/1 !important; }
-}
-
-/* Footer mobile */
-@media (max-width: 768px) {
-  footer div[style*="repeat(4, 1fr)"] { grid-template-columns: repeat(2, 1fr) !important; gap: 24px !important; }
-  footer div[style*="marginBottom: 64px"] { margin-bottom: 32px !important; }
-  footer { padding: 40px 0 0 !important; }
-  footer div[style*="padding: '0 48px'"] { padding: 0 16px !important; }
-}
-
-/* Product grid on products page */
-@media (max-width: 768px) {
-  div[style*="repeat(4, 1fr)"][style*="gap: 32px"],
-  div[style*="repeat(3, 1fr)"][style*="gap: 32px"] { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
-}
-
-/* Cart and account pages */
-@media (max-width: 768px) {
-  div[style*="maxWidth: 800"], div[style*="maxWidth: 440"] { padding: 60px 16px !important; }
-}
-
-/* Product detail page */
-@media (max-width: 768px) {
-  div[style*="maxWidth: 1400"][style*="padding: '0 48px'"],
-  div[style*="padding: '40px 48px'"],
-  div[style*="padding: '40px 24px'"] { padding: 20px 16px !important; }
-}
