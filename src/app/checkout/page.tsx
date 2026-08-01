@@ -89,12 +89,12 @@ export default function CheckoutPage() {
   return (
     <div style={{background:'#fff',minHeight:'100vh'}}>
       
-      <div style={{maxWidth:1100,margin:'0 auto',padding:'100px 48px 80px'}}>
+      <div style={{maxWidth:1100,margin:'0 auto',padding: isMobile ? '60px 16px 40px' : '100px 48px 80px'}}>
         <Link href="/cart" style={{fontSize:13,color:'#D63F1C',textDecoration:'none',display:'inline-block',marginBottom:8}}>← Cart</Link>
         <h1 style={{fontSize:28,fontWeight:400,color:'#14140f',marginBottom:40}}>Checkout</h1>
         {errors.general && <div style={{background:'#fef2f2',border:'1px solid #fecaca',padding:'14px 18px',marginBottom:24,fontSize:14,color:'#b32d2e',borderRadius:8}}>{errors.general}</div>}
 
-        <div style={{display:'grid',gridTemplateColumns:'1fr 400px',gap:56,alignItems:'start'}}>
+        <div style={{display:'grid',gridTemplateColumns:isMobile ? '1fr' : '1fr 400px', gap: isMobile ? 24 : 56,alignItems:'start'}}>
           <div>
             <div style={{marginBottom:40}}>
               <h2 style={{fontSize:18,fontWeight:500,color:'#14140f',marginBottom:20}}>Contact</h2>

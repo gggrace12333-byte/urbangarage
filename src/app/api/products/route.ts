@@ -16,26 +16,21 @@ export async function GET(request: NextRequest) {
     const data = await res.json();
     const p = data?.[0];
     if (!p) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    return NextResponse.json({
-      ...p,
-      category_name: p.categories?.name,
-      images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []),
-    });
+    return NextResponse.json({ ...p, category_name: p.categories?.name, images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []) });
   }
 
-  let url = `${SUPABASE_URL}/rest/v1/products?select=*,categories(name)&active=eq.1&order=created_at.desc`;
+  let url = `${SUPABASE_URL}/rest/v1/products?select=*,categories!inner(name)&active=eq.1&order=created_at.desc`;
   if (featured === '1') url += '&featured=eq.1';
+  if (category) {
+    const catRes = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=id&slug=eq.${encodeURIComponent(category)}`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
+    const cats = await catRes.json();
+    if (cats?.[0]) url += `&category_id=eq.${cats[0].id}`;
+  }
 
-  const res = await fetch(url, {
-    headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
-  });
+  const res = await fetch(url, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
   const data: any[] = await res.json();
 
-  const products = (data || []).map((p: any) => ({
-    ...p,
-    category_name: p.categories?.name,
-    images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []),
-  }));
+  const products = (data || []).map((p: any) => ({ ...p, category_name: p.categories?.name, images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []) }));
 
   return NextResponse.json(products);
 }
