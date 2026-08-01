@@ -7,6 +7,7 @@ import { Product } from '@/lib/types';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 function ProductsContent() {
+  const isMobile = useIsMobile();
   const sp = useSearchParams();
   const router = useRouter();
   const cat = sp.get('category');

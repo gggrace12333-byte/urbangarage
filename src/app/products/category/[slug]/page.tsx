@@ -7,6 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import { Product } from '@/lib/types';
 
 function CategoryContent() {
+  const isMobile = useIsMobile();
   const params = useParams();
   const slug = params.slug as string;
   const [products, setProducts] = useState<Product[]>([]);

@@ -5,6 +5,7 @@ import { useIsMobile } from '@/lib/useIsMobile';
 import Image from 'next/image';
 
 function AboutContent() {
+  const isMobile = useIsMobile();
   const [s, setS] = useState<Record<string,string>>({});
   useEffect(() => { fetch('/api/admin/settings').then(r=>r.json()).then(setS); }, []);
 
