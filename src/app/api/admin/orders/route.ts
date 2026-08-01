@@ -1,28 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+
+const URL = 'https://ikjbbfgrwynixtpfdauj.supabase.co';
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const H = () => ({ apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' });
 
 export async function GET(request: NextRequest) {
-  const db = getDb();
   const email = request.nextUrl.searchParams.get('email');
-  let orders;
-  if (email) {
-    orders = await db.prepare('SELECT * FROM orders WHERE customer_email = ? ORDER BY created_at DESC').all(email);
-  } else {
-    orders = await db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
-  }
-  for (const order of orders as any[]) {
-    order.items = await db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id);
+  let query = `${URL}/rest/v1/orders?select=*&order=created_at.desc`;
+  if (email) query += `&customer_email=eq.${encodeURIComponent(email)}`;
+  const r = await fetch(query, { headers: H() });
+  const orders: any[] = await r.json();
+  for (const order of orders) {
+    const ir = await fetch(`${URL}/rest/v1/order_items?select=*&order_id=eq.${order.id}`, { headers: H() });
+    order.items = await ir.json();
   }
   return NextResponse.json(orders);
 }
 
 export async function PUT(request: NextRequest) {
-  const db = getDb();
   const body = await request.json();
+  const updates: any = {};
   if (body.tracking_number) {
-    await db.prepare('UPDATE orders SET tracking_number=?, tracking_url=?, status=?, updated_at=datetime(\'now\') WHERE id=?').run(body.tracking_number, body.tracking_url||'', body.status||'shipped', body.id);
+    updates.tracking_number = body.tracking_number;
+    updates.tracking_url = body.tracking_url || '';
+    updates.status = body.status || 'shipped';
   } else {
-    await db.prepare('UPDATE orders SET status=?, updated_at=datetime(\'now\') WHERE id=?').run(body.status, body.id);
+    updates.status = body.status;
   }
-  return NextResponse.json({success:true});
+  await fetch(`${URL}/rest/v1/orders?id=eq.${body.id}`, { method: 'PATCH', headers: { ...H(), Prefer: 'return=minimal' }, body: JSON.stringify(updates) });
+  return NextResponse.json({ success: true });
 }

@@ -1,30 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+
+const URL = 'https://ikjbbfgrwynixtpfdauj.supabase.co';
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const H = () => ({ apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' });
 
 export async function GET() {
-  const db = getDb();
-  const __r = await db.prepare('SELECT * FROM categories ORDER BY sort_order').all(); return NextResponse.json(__r);
+  const r = await fetch(`${URL}/rest/v1/categories?select=*&order=sort_order`, { headers: H() });
+  return NextResponse.json(await r.json());
 }
-
 export async function POST(request: NextRequest) {
-  const db = getDb();
-  const { name, slug: customSlug, description, sort_order } = await request.json();
-  const slug = customSlug || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  const r = await db.prepare('INSERT INTO categories (name,slug,description,sort_order) VALUES (?,?,?,?)').run(name,slug,description||'',sort_order||0);
-  return NextResponse.json(await db.prepare('SELECT * FROM categories WHERE id=?').get(r.lastInsertRowid),{status:201});
+  const { name, slug: cs, description, sort_order } = await request.json();
+  const slug = cs || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const r = await fetch(`${URL}/rest/v1/categories`, { method: 'POST', headers: { ...H(), Prefer: 'return=representation' }, body: JSON.stringify({ name, slug, description: description||'', sort_order: sort_order||0 }) });
+  return NextResponse.json((await r.json())?.[0], { status: 201 });
 }
-
 export async function PUT(request: NextRequest) {
-  const db = getDb();
-  const { id, name, slug: customSlug, description, sort_order } = await request.json();
-  const slug = customSlug || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  await db.prepare('UPDATE categories SET name=?,slug=?,description=?,sort_order=? WHERE id=?').run(name,slug,description||'',sort_order||0,id);
-  return NextResponse.json({success:true});
+  const { id, name, slug: cs, description, sort_order } = await request.json();
+  const slug = cs || name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  await fetch(`${URL}/rest/v1/categories?id=eq.${id}`, { method: 'PATCH', headers: { ...H(), Prefer: 'return=minimal' }, body: JSON.stringify({ name, slug, description: description||'', sort_order: sort_order||0 }) });
+  return NextResponse.json({ success: true });
 }
-
 export async function DELETE(request: NextRequest) {
-  const db = getDb();
   const { id } = await request.json();
-  await db.prepare('DELETE FROM categories WHERE id=?').run(id);
-  return NextResponse.json({success:true});
+  await fetch(`${URL}/rest/v1/categories?id=eq.${id}`, { method: 'DELETE', headers: H() });
+  return NextResponse.json({ success: true });
 }
