@@ -101,7 +101,7 @@ export default function Header({ serverCategories = [], serverSettings = {} }: H
     <>
       <AnnouncementBar serverAnnLeft={serverSettings.announcement_left} serverAnnRight={serverSettings.announcement_right} />
       <header style={{ background: '#000', position: 'sticky', top: 0, zIndex: 50 }}>
-        <div className="header-inner" style={{ maxWidth: 1400, margin: '0 auto', padding: '0 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
+        <div className="header-inner" style={{ maxWidth: 1400, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
           {/* Logo */}
           <Link href="/" style={{ textDecoration: 'none', flexShrink: 0, display: 'flex', alignItems: 'center', height: 48 }}>
             {logoUrl ? (
@@ -199,12 +199,12 @@ export default function Header({ serverCategories = [], serverSettings = {} }: H
       <style jsx>{`
         .mobile-menu-btn { display: none; }
         .desktop-nav { display: flex; }
-        @media (max-width: 1023px) {
+        @media (max-width: 768px) {
           .desktop-nav { display: none; }
           .mobile-menu-btn { display: block; }
           .header-inner { padding: 0 24px; }
         }
-        @media (min-width: 1024px) {
+        @media (min-width: 769px) {
           .mobile-nav { display: none; }
         }
       `}</style>
