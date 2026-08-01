@@ -33,8 +33,8 @@ export default function Footer() {
 
   return (
     <footer style={{ background: '#000', color: '#fff', padding: '80px 0 0' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 48px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 48, marginBottom: 64 }}>
+      <div className="ft-container" style={{ maxWidth: 1400, margin: '0 auto', padding: '0 48px' }}>
+        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 48, marginBottom: 64 }}>
           <div>
             <Link href="/" style={{ textDecoration: 'none' }}>
               {logoUrl ? <img src={logoUrl} alt="Logo" style={{ height: 42, width: 'auto' }} /> : <span style={{ fontSize: 20, fontWeight: 600, color: '#fff', letterSpacing: '-0.01em' }}>URBAN<span style={{ color: '#D63F1C', fontWeight: 300 }}>GARAGE</span></span>}
@@ -63,6 +63,14 @@ export default function Footer() {
           <p style={{ fontSize: 12, color: '#555', margin: 0 }}>&copy; {new Date().getFullYear()} Urban Garage. All rights reserved.</p>
         </div>
       </div>
+
+    <style jsx>{`
+      @media (max-width: 768px) {
+        footer { padding: 40px 16px !important; }
+        .ft-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 24px !important; }
+        .ft-container { padding: 0 !important; }
+      }
+    `}</style>
     </footer>
   );
 }
