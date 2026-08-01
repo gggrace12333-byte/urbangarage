@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useIsMobile } from '@/lib/useIsMobile';
 
 const sections = {
   Navigate: [{href:'/products',label:'All Products'},{href:'/about',label:'About Us'},{href:'/contact',label:'Contact'},{href:'/cart',label:'Cart'}],
@@ -20,6 +21,7 @@ const socialLabels: Record<string, string> = {
 };
 
 export default function Footer() {
+  const isMobile = useIsMobile();
   const [settings, setSettings] = useState<Record<string,string>>({'social_instagram':'https://instagram.com','social_facebook':'https://facebook.com','social_youtube':'https://youtube.com','social_tiktok':'https://tiktok.com','social_instagram_show':'1','social_facebook_show':'1','social_youtube_show':'1','social_tiktok_show':'1'});
   useEffect(() => { fetch('/api/admin/settings').then(r=>r.json()).then(setSettings); }, []);
 
@@ -32,9 +34,9 @@ export default function Footer() {
   });
 
   return (
-    <footer style={{ background: '#000', color: '#fff', padding: '80px 0 0' }}>
-      <div className="ft-container" style={{ maxWidth: 1400, margin: '0 auto', padding: '0 48px' }}>
-        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 48, marginBottom: 64 }}>
+    <footer style={{ background: '#000', color: '#fff', padding: isMobile ? '40px 0 0' : '80px 0 0' }}>
+      <div className="ft-container" style={{ maxWidth: 1400, margin: '0 auto', padding: isMobile ? '0 16px' : '0 48px' }}>
+        <div className="ft-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 48, marginBottom: 64 }}>
           <div>
             <Link href="/" style={{ textDecoration: 'none' }}>
               {logoUrl ? <img src={logoUrl} alt="Logo" style={{ height: 42, width: 'auto' }} /> : <span style={{ fontSize: 20, fontWeight: 600, color: '#fff', letterSpacing: '-0.01em' }}>URBAN<span style={{ color: '#D63F1C', fontWeight: 300 }}>GARAGE</span></span>}
@@ -64,13 +66,6 @@ export default function Footer() {
         </div>
       </div>
 
-    <style jsx>{`
-      @media (max-width: 768px) {
-        footer { padding: 40px 16px !important; }
-        .ft-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 24px !important; }
-        .ft-container { padding: 0 !important; }
-      }
-    `}</style>
     </footer>
   );
 }
